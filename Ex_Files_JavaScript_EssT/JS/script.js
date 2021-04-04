@@ -1,74 +1,29 @@
-const testWrapper = document.querySelector(".test-wrapper");
-const testArea = document.querySelector("#test-area");
-const originText = document.querySelector("#origin-text p").innerHTML;
-const resetButton = document.querySelector("#reset");
-const theTimer = document.querySelector(".timer");
+const IMAGES = document.querySelectorAll("img");
+const SIZES = {
+  showcase: "100vw",
+  reason: "(max-width: 799px) 100vw, 372px",
+  feature: "(max-width: 799px) 100vw, 558px",
+  story: "(max-width: 799px) 100vw, 670px"
+}
 
-// Add leading zero to numbers 9 or below (purely for aesthetics):
+function makeSrcset(imgSrc) {
+  let makeUp = [];
+  let width = 400;
 
-var timer = [0,0,0,0];
-var interval;
-var timeRunning = false;
-
-function leadingZero(time) {
-  if(time <= 9) {
-    time = "0" + time;
+  for (var i = 0; i < 5; i++) {
+    makeUp[i] = imgSrc + "-" + width + ".jpg " + width + "w";
+    width += 400;
   }
-  return time;
+  return makeUp.join();
 }
 
-// Run a standard minute/second/hundredths timer:
+for (var i = 0; i < IMAGES.length; i++) {
+  let imgSrc = IMAGES[i].getAttribute("src");
+  imgSrc = imgSrc.slice(0, -8);
+  let srcset = makeSrcset(imgSrc);
+  IMAGES[i].setAttribute("srcset", srcset);
 
-function runTimeout() {
-  const currentTimer = leadingZero(timer[0]) + ":" + leadingZero(timer[1]) + ":" + leadingZero(timer[2]);
-  theTimer.innerHTML = currentTimer;
-  timer[3]++;
-
-  timer[0] = Math.floor((timer[3] / 100) / 60);
-  timer[1] = Math.floor((timer[3] / 100) - (timer[0] * 60));
-  timer[2] = Math.floor(timer[3] - (timer[1] * 100) - (timer[0] * 6000));
+  let types = IMAGES[i].getAttribute("data-type");
+  let sizes = SIZES[types];
+  IMAGES[i].setAttribute("sizes", sizes);
 }
-
-// Match the text entered with the provided text on the page:
-function spellCheck() {
-  let textEntered = testArea.value;
-  const originTextMatch = originText.substring(0, textEntered.length);
-  if(textEntered == originText) {
-    clearInterval(interval);
-    testWrapper.style.borderColor = "#429890"
-  } else {
-    if (textEntered == originTextMatch) {
-      testWrapper.style.borderColor = "#65CCF3";
-    } else {
-      testWrapper.style.borderColor = "#E95D0F"
-    }
-  }
-  console.log(textEntered); 
-}
-
-// Start the timer:
-function start() {
-  let textEnteredLength = testArea.value.length;
-  if(textEnteredLength === 0 && !timeRunning) {
-    timeRinning = true;
-    interval = setInterval(runTimeout, 10);
-  }
-  console.log(textEnteredLength)
-}
-
-// Reset everything:
-function reset() {
-  clearInterval(interval);
-  interval = null;
-  timer = [0,0,0,0];
-  timeRunning = false;
-
-  testArea.value = "";
-  theTimer.innerHTML = "00:00:00";
-  testWrapper.style.borderColor = "grey";
-}
-
-// Event listeners for keyboard input and the reset button:
-testArea.addEventListener("keypress", start, false);
-testArea.addEventListener("keyup", spellCheck, false);
-resetButton.addEventListener("click", reset, false);
